@@ -1,10 +1,12 @@
-(ns badassguestbook.handler  
-  (:require [compojure.core :refer [defroutes]]            
+(ns badassguestbook.handler
+  (:require [compojure.core :refer [defroutes]]
             [badassguestbook.routes.home :refer [home-routes]]
             [noir.util.middleware :as middleware]
             [compojure.route :as route]
             [taoensso.timbre :as timbre]
-            [com.postspectacular.rotor :as rotor]))
+            [com.postspectacular.rotor :as rotor]
+            [badassguestbook.models.schema :as schema]
+            ))
 
 (defroutes app-routes
   (route/resources "/")
@@ -23,12 +25,15 @@
      :async? false ; should be always false for rotor
      :max-message-per-msecs nil
      :fn rotor/append})
-  
+
   (timbre/set-config!
     [:shared-appender-config :rotor]
-    {:path "badassguestbook.log" :max-size (* 512 1024) :backlog 10})
-  
-  (timbre/info "badassguestbook started successfully"))
+    {:path "badassguestbook.log" :max-size 10000 :backlog 10})
+
+  ;;initialize the database if needed
+  (if-not (schema/initialized?) (schema/create-tables))
+
+  (timbre/info "guestbook started successfully..."))
 
 (defn destroy
   "destroy will be called when your application

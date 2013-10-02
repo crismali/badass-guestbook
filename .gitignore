@@ -7,3 +7,4 @@ pom.xml
 *.class
 /.lein-*
 /.env
+/resources/public/site.db.h2.db
